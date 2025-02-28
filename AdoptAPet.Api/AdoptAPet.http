@@ -1,0 +1,249 @@
+# AdoptAPet API Test File
+# 
+# This file contains HTTP requests to test the AdoptAPet API during the technical interview.
+# Each section corresponds to a task in the interview, allowing you to verify the candidate's implementation.
+#
+# How to use:
+# 1. Run the AdoptAPet.Api project
+# 2. Execute the authentication requests first to get valid tokens
+# 3. Run the tests for each task as the candidate completes them
+# 4. Check the responses to verify correct implementation
+#
+# Note: The @name and variable assignments allow for capturing tokens from responses
+# and using them in subsequent requests.
+
+@baseUrl = https://localhost:7001
+@adminToken = 
+@shelterStaffToken = 
+@adopterToken = 
+
+### ===== Authentication Tests =====
+
+### Register Admin User
+POST {{baseUrl}}/api/Auth/register
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "email": "admin@example.com",
+  "password": "Password123!",
+  "role": 0
+}
+
+### Login as Admin (save the token)
+# @name loginAdmin
+POST {{baseUrl}}/api/Auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "Password123!"
+}
+
+### Save admin token from response
+@adminToken = {{loginAdmin.response.body.token}}
+
+### Register Shelter Staff User
+POST {{baseUrl}}/api/Auth/register
+Content-Type: application/json
+
+{
+  "username": "staff",
+  "email": "staff@example.com",
+  "password": "Password123!",
+  "role": 1,
+  "shelterId": 1
+}
+
+### Login as Shelter Staff (save the token)
+# @name loginStaff
+POST {{baseUrl}}/api/Auth/login
+Content-Type: application/json
+
+{
+  "username": "staff",
+  "password": "Password123!"
+}
+
+### Save shelter staff token from response
+@shelterStaffToken = {{loginStaff.response.body.token}}
+
+### Register Adopter User
+POST {{baseUrl}}/api/Auth/register
+Content-Type: application/json
+
+{
+  "username": "adopter",
+  "email": "adopter@example.com",
+  "password": "Password123!",
+  "role": 2
+}
+
+### Login as Adopter (save the token)
+# @name loginAdopter
+POST {{baseUrl}}/api/Auth/login
+Content-Type: application/json
+
+{
+  "username": "adopter",
+  "password": "Password123!"
+}
+
+### Save adopter token from response
+@adopterToken = {{loginAdopter.response.body.token}}
+
+### ===== Task 1: Test Shelter Service Implementation =====
+
+### Get All Shelters
+GET {{baseUrl}}/api/Shelters
+Content-Type: application/json
+
+### Get Shelter by ID
+GET {{baseUrl}}/api/Shelters/1
+Content-Type: application/json
+
+### Create Shelter (requires Admin)
+POST {{baseUrl}}/api/Shelters
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "New Test Shelter",
+  "address": "123 Test Street, Test City",
+  "phone": "555-123-4567",
+  "email": "test@shelter.com"
+}
+
+### Update Shelter (requires Admin)
+PUT {{baseUrl}}/api/Shelters/1
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Updated Shelter Name",
+  "address": "456 Updated Street, Updated City",
+  "phone": "555-987-6543",
+  "email": "updated@shelter.com"
+}
+
+### Delete Shelter (requires Admin)
+DELETE {{baseUrl}}/api/Shelters/3
+Authorization: Bearer {{adminToken}}
+
+### ===== Task 1: Test Adoption Application Service Implementation =====
+
+### Get All Applications
+GET {{baseUrl}}/api/AdoptionApplications
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+### Get Application by ID
+GET {{baseUrl}}/api/AdoptionApplications/1
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+### Get Applications by Pet ID
+GET {{baseUrl}}/api/AdoptionApplications/pet/3
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+### Get Applications by Status
+GET {{baseUrl}}/api/AdoptionApplications/status/0
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+### Create Application
+POST {{baseUrl}}/api/AdoptionApplications
+Content-Type: application/json
+Authorization: Bearer {{adopterToken}}
+
+{
+  "petId": 1,
+  "applicantName": "John Doe",
+  "applicantEmail": "john.doe@example.com",
+  "applicantPhone": "555-111-2222",
+  "applicantAddress": "789 Applicant St, Anytown",
+  "additionalNotes": "I have a large yard and work from home."
+}
+
+### Update Application
+PUT {{baseUrl}}/api/AdoptionApplications/1
+Content-Type: application/json
+Authorization: Bearer {{shelterStaffToken}}
+
+{
+  "applicantPhone": "555-333-4444",
+  "additionalNotes": "Updated notes about the application."
+}
+
+### Approve Application
+PUT {{baseUrl}}/api/AdoptionApplications/approve/2
+Authorization: Bearer {{shelterStaffToken}}
+
+### Reject Application
+PUT {{baseUrl}}/api/AdoptionApplications/reject/3
+Authorization: Bearer {{shelterStaffToken}}
+
+### ===== Task 3: Test Filtering and Pagination =====
+
+### Get Pets with Pagination
+GET {{baseUrl}}/api/Pets?pageNumber=1&pageSize=2
+Content-Type: application/json
+
+### Get Pets with Filtering by Type and Status
+GET {{baseUrl}}/api/Pets?type=0&status=0
+Content-Type: application/json
+
+### Get Pets with Filtering and Pagination
+GET {{baseUrl}}/api/Pets?type=0&status=0&pageNumber=1&pageSize=2
+Content-Type: application/json
+
+### ===== Task 4: Test Caching =====
+
+### Get All Pets (should be cached)
+GET {{baseUrl}}/api/Pets
+Content-Type: application/json
+
+### Get All Shelters (should be cached)
+GET {{baseUrl}}/api/Shelters
+Content-Type: application/json
+
+### Create Pet (should invalidate cache)
+POST {{baseUrl}}/api/Pets
+Content-Type: application/json
+Authorization: Bearer {{shelterStaffToken}}
+
+{
+  "name": "Cache Test Pet",
+  "type": 0,
+  "breed": "Mixed",
+  "age": 2,
+  "description": "Testing cache invalidation",
+  "shelterId": 1
+}
+
+### ===== Task 5: Test Bug Fix =====
+
+### Update Pet with Shelter Change
+PUT {{baseUrl}}/api/Pets/1
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "shelterId": 2
+}
+
+### Get Pet to Verify Shelter Update
+GET {{baseUrl}}/api/Pets/1
+Content-Type: application/json
+
+### Update Pet with Invalid Shelter
+PUT {{baseUrl}}/api/Pets/1
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "shelterId": 999
+}
+
+###
