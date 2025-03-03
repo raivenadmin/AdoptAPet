@@ -19,6 +19,10 @@ namespace AdoptAPet.Api.Models
         public Pet? Pet { get; set; }
         
         [Required]
+        public int UserId { get; set; }
+        public User? User { get; set; }
+        
+        [Required]
         [MaxLength(100)]
         public string ApplicantName { get; set; } = string.Empty;
         

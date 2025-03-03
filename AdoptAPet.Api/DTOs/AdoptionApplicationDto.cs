@@ -8,6 +8,7 @@ namespace AdoptAPet.Api.DTOs
         public int Id { get; set; }
         public int PetId { get; set; }
         public string PetName { get; set; } = string.Empty;
+        public int UserId { get; set; }
         public string ApplicantName { get; set; } = string.Empty;
         public string ApplicantEmail { get; set; } = string.Empty;
         public string ApplicantPhone { get; set; } = string.Empty;
@@ -22,24 +23,27 @@ namespace AdoptAPet.Api.DTOs
     {
         [Required]
         public int PetId { get; set; }
-        
+
+        [Required]
+        public int UserId { get; set; }
+
         [Required]
         [MaxLength(100)]
         public string ApplicantName { get; set; } = string.Empty;
-        
+
         [Required]
         [MaxLength(100)]
         [EmailAddress]
         public string ApplicantEmail { get; set; } = string.Empty;
-        
+
         [Required]
         [MaxLength(20)]
         public string ApplicantPhone { get; set; } = string.Empty;
-        
+
         [Required]
         [MaxLength(200)]
         public string ApplicantAddress { get; set; } = string.Empty;
-        
+
         [MaxLength(1000)]
         public string? AdditionalNotes { get; set; }
     }

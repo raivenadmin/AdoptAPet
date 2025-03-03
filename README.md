@@ -40,6 +40,8 @@ The system consists of four main entities with the following relationships:
 - Users have different roles (Admin, ShelterStaff, Adopter)
 - ShelterStaff users are associated with a specific shelter (many-to-one relationship)
 
+![DB Schema](<DB Schema.png>)
+
 ### Authentication & Authorization
 
 - JWT-based authentication system

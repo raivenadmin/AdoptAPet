@@ -37,6 +37,12 @@ namespace AdoptAPet.Api.Data
                 .HasForeignKey(u => u.ShelterId)
                 .OnDelete(DeleteBehavior.SetNull);
 
+            modelBuilder.Entity<AdoptionApplication>()
+                .HasOne(a => a.User)
+                .WithMany(u => u.AdoptionApplications)
+                .HasForeignKey(a => a.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // Seed data
             SeedData(modelBuilder);
         }
@@ -47,6 +53,30 @@ namespace AdoptAPet.Api.Data
             modelBuilder.Entity<Shelter>().HasData(
                 new Shelter { Id = 1, Name = "Happy Paws Shelter", Address = "123 Main St, Anytown, USA", Phone = "555-123-4567", Email = "info@happypaws.example.com" },
                 new Shelter { Id = 2, Name = "Furry Friends Rescue", Address = "456 Oak Ave, Somewhere, USA", Phone = "555-987-6543", Email = "contact@furryfriendsrescue.example.com" }
+            );
+
+            // Seed users
+            modelBuilder.Entity<User>().HasData(
+                new User 
+                { 
+                    Id = 1, 
+                    Username = "admin", 
+                    Email = "admin@example.com", 
+                    PasswordHash = new byte[] { }, // In a real app, this would be a proper hash
+                    PasswordSalt = new byte[] { }, // In a real app, this would be a proper salt
+                    Role = UserRole.Admin,
+                    CreatedAt = DateTime.Parse("2023-01-01")
+                },
+                new User 
+                { 
+                    Id = 2, 
+                    Username = "johnsmith", 
+                    Email = "john.smith@example.com", 
+                    PasswordHash = new byte[] { }, // In a real app, this would be a proper hash
+                    PasswordSalt = new byte[] { }, // In a real app, this would be a proper salt
+                    Role = UserRole.Adopter,
+                    CreatedAt = DateTime.Parse("2023-01-02")
+                }
             );
 
             // Seed pets
@@ -63,6 +93,7 @@ namespace AdoptAPet.Api.Data
                 {
                     Id = 1,
                     PetId = 3,
+                    UserId = 2, // Link to John Smith's user account
                     ApplicantName = "John Smith",
                     ApplicantEmail = "john.smith@example.com",
                     ApplicantPhone = "555-111-2222",

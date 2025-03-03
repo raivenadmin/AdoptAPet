@@ -17,6 +17,7 @@ namespace AdoptAPet.Tests
     {
         private Shelter? _testShelter;
         private Pet? _testPet;
+        private User? _testUser;
 
         public Task1_AdoptionApplicationTests() : base()
         {
@@ -34,6 +35,19 @@ namespace AdoptAPet.Tests
                 Email = "test@shelter.com"
             };
             _dbContext.Shelters.Add(_testShelter);
+            await _dbContext.SaveChangesAsync();
+
+            // Create a test user
+            _testUser = new User
+            {
+                Username = "testuser",
+                Email = "test@example.com",
+                PasswordHash = new byte[] { },
+                PasswordSalt = new byte[] { },
+                Role = UserRole.Adopter,
+                CreatedAt = DateTime.UtcNow
+            };
+            _dbContext.Users.Add(_testUser);
             await _dbContext.SaveChangesAsync();
 
             // Create a test pet
@@ -54,6 +68,7 @@ namespace AdoptAPet.Tests
             var application = new AdoptionApplication
             {
                 PetId = _testPet.Id,
+                UserId = _testUser.Id,
                 ApplicantName = "Initial Applicant",
                 ApplicantEmail = "initial@example.com",
                 ApplicantPhone = "555-111-2222",
@@ -107,6 +122,7 @@ namespace AdoptAPet.Tests
             // Assert
             application.Should().NotBeNull();
             application!.ApplicantName.Should().Be("Initial Applicant");
+            application.UserId.Should().Be(_testUser!.Id);
         }
 
         [Fact]
@@ -119,6 +135,7 @@ namespace AdoptAPet.Tests
             var createApplicationDto = new CreateAdoptionApplicationDto
             {
                 PetId = _testPet!.Id,
+                UserId = _testUser!.Id,
                 ApplicantName = "Test Applicant",
                 ApplicantEmail = "test@example.com",
                 ApplicantPhone = "555-123-4567",
@@ -133,11 +150,13 @@ namespace AdoptAPet.Tests
             createdApplication.Should().NotBeNull();
             createdApplication.ApplicantName.Should().Be(createApplicationDto.ApplicantName);
             createdApplication.Status.Should().Be(ApplicationStatus.Pending);
+            createdApplication.UserId.Should().Be(_testUser!.Id);
 
             // Verify it was actually saved to the database
             var applicationInDb = await _dbContext.AdoptionApplications.FindAsync(createdApplication.Id);
             applicationInDb.Should().NotBeNull();
             applicationInDb!.ApplicantName.Should().Be(createApplicationDto.ApplicantName);
+            applicationInDb.UserId.Should().Be(_testUser!.Id);
         }
 
         [Fact]
@@ -163,12 +182,14 @@ namespace AdoptAPet.Tests
             updatedApplication.Should().NotBeNull();
             updatedApplication!.ApplicantPhone.Should().Be(updateApplicationDto.ApplicantPhone);
             updatedApplication.AdditionalNotes.Should().Be(updateApplicationDto.AdditionalNotes);
+            updatedApplication.UserId.Should().Be(_testUser!.Id);
 
             // Verify it was actually updated in the database
             var applicationInDb = await _dbContext.AdoptionApplications.FindAsync(existingApplication.Id);
             applicationInDb.Should().NotBeNull();
             applicationInDb!.ApplicantPhone.Should().Be(updateApplicationDto.ApplicantPhone);
             applicationInDb.AdditionalNotes.Should().Be(updateApplicationDto.AdditionalNotes);
+            applicationInDb.UserId.Should().Be(_testUser!.Id);
         }
 
         [Fact]
@@ -191,6 +212,7 @@ namespace AdoptAPet.Tests
             var applicationInDb = await _dbContext.AdoptionApplications.FindAsync(existingApplication.Id);
             applicationInDb.Should().NotBeNull();
             applicationInDb!.Status.Should().Be(ApplicationStatus.Approved);
+            applicationInDb.UserId.Should().Be(_testUser!.Id);
         }
 
         [Fact]
@@ -213,6 +235,7 @@ namespace AdoptAPet.Tests
             var applicationInDb = await _dbContext.AdoptionApplications.FindAsync(existingApplication.Id);
             applicationInDb.Should().NotBeNull();
             applicationInDb!.Status.Should().Be(ApplicationStatus.Rejected);
+            applicationInDb.UserId.Should().Be(_testUser!.Id);
         }
 
         [Fact]
@@ -225,6 +248,7 @@ namespace AdoptAPet.Tests
             var newApplication = new AdoptionApplication
             {
                 PetId = _testPet!.Id,
+                UserId = _testUser!.Id,
                 ApplicantName = "Delete Test",
                 ApplicantEmail = "delete@example.com",
                 ApplicantPhone = "555-123-4567",
