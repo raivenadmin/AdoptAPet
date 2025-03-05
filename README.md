@@ -97,13 +97,13 @@ The system consists of four main entities with the following relationships:
 
 ## Technical Interview Tasks
 
-### Task 1: Implement Missing Service
+### Task 1: Implement Missing Service Method
 - Implement the UpdateApplicationAsync method in the AdoptionApplicationService
   - Update all populated fields in the DTO
   - If the status is changed to approved, update the pet status to Adopted and reject other applications for this pet
   - If the status is changed to rejected and there are no more pending applications for this pet, change pet status back to Available
 
-### Task 2: Create Missing Controller Endp0oint
+### Task 2: Create Missing Controller Endpoint
 - Implement the **GetAll** method on AdoptionApplicationController 
 - Returns all applications (with role-based filtering)
 - Implement proper authorization:
