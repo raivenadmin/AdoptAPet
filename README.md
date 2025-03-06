@@ -119,7 +119,7 @@ The system consists of four main entities with the following relationships:
 - Implement cache invalidation when entities are modified
 
 ### Task 5: Fix the Bug
-- There's a bug in the `PetService.UpdatePetAsync` method that doesn't properly handle shelter relationships
+- When updating a Pet and changing their Shelter to a new one, the data appears to be updated correctly in the database, however updated Pet that is returned still shows the name of the original Shelter.
 - Fix the bug and ensure proper error handling
 
 
